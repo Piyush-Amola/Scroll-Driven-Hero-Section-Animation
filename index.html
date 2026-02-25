@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll Car Animation</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        overflow-x: hidden;
+        background: radial-gradient(circle at top, #1f1f2e, #0f0f16);
+        color: white;
+      }
+
+      .section {
+        height: 230vh;
+        position: relative;
+      }
+
+      .track {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .road {
+        width: 90%;
+        height: 200px;
+        background: linear-gradient(90deg, #111, #1c1c1c);
+        border-radius: 50px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        margin-top: 80px;
+      }
+
+      .car {
+        height: 150px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 0;
+        z-index: 5;
+        filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.7));
+      }
+
+      .trail {
+        height: 100%;
+        background: linear-gradient(to right, #00f5a0, #00d9f5);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        opacity: 0.15;
+        border-radius: 50px;
+        z-index: 1;
+      }
+
+      /* Heading Text */
+      .value-add {
+        position: absolute;
+        top: 10%;
+        left: 8%;
+        font-size: clamp(2rem, 5vw, 5rem);
+        font-weight: 700;
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+      }
+
+      .value-letter {
+        opacity: 0;
+        transform: translateY(40px);
+        color: #00f5a0;
+        text-shadow: 0 0 15px rgba(0, 245, 160, 0.6);
+      }
+
+      /* Glass Cards */
+      .text-box {
+        position: absolute;
+        opacity: 0;
+        padding: 25px;
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        transition: 0.4s ease;
+        max-width: 260px;
+      }
+
+      .text-box:hover {
+        transform: translateY(-10px) scale(1.05);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      #box1 {
+        top: 5%;
+        right: 20%;
+      }
+      #box2 {
+        bottom: 10%;
+        right: 25%;
+      }
+      #box3 {
+        top: 5%;
+        right: 5%;
+      }
+      #box4 {
+        bottom: 10%;
+        right: 5%;
+      }
+
+      .num-box {
+        font-size: 55px;
+        font-weight: 700;
+        color: #00f5a0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="section">
+      <div class="track">
+        <div class="road" id="road">
+          <img src="./images.png" alt="car" class="car" id="car" />
+          <div class="trail" id="trail"></div>
+
+          <div class="value-add" id="valueText">
+            <span class="value-letter">W</span>
+            <span class="value-letter">E</span>
+            <span class="value-letter">L</span>
+            <span class="value-letter">C</span>
+            <span class="value-letter">O</span>
+            <span class="value-letter">M</span>
+            <span class="value-letter">E</span>
+            <span class="value-letter">&nbsp;</span>
+            <span class="value-letter">I</span>
+            <span class="value-letter">T</span>
+            <span class="value-letter">Z</span>
+            <span class="value-letter">F</span>
+            <span class="value-letter">I</span>
+            <span class="value-letter">Z</span>
+            <span class="value-letter">Z</span>
+          </div>
+        </div>
+
+        <!-- Stat Boxes -->
+        <div class="text-box" id="box1">
+          <div class="num-box">58%</div>
+          Increase in pickup usage
+        </div>
+
+        <div class="text-box" id="box2">
+          <div class="num-box">23%</div>
+          Decrease in customer calls
+        </div>
+
+        <div class="text-box" id="box3">
+          <div class="num-box">27%</div>
+          Increased efficiency
+        </div>
+
+        <div class="text-box" id="box4">
+          <div class="num-box">40%</div>
+          Faster deliveries
+        </div>
+      </div>
+    </div>
+
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      const car = document.getElementById("car");
+      const trail = document.getElementById("trail");
+      const letters = gsap.utils.toArray(".value-letter");
+      const valueAdd = document.querySelector(".value-add");
+      const boxes = gsap.utils.toArray(".text-box");
+
+      const road = document.getElementById("road");
+      const roadWidth = road.offsetWidth;
+      const carWidth = car.offsetWidth;
+      const endX = roadWidth - carWidth;
+
+      const letterOffsets = letters.map((l) => l.offsetLeft);
+
+      gsap.to(car, {
+        x: endX,
+        duration: 15,
+        ease: "none",
+        onUpdate: updateLettersAndBoxes,
+        onComplete: () => console.log("Car reached end!"),
+      });
+
+      gsap.to(car, {
+        y: "+=8",
+        repeat: -1,
+        yoyo: true,
+        duration: 1.5,
+        ease: "sine.inOut",
+      });
+
+      // FUNCTION TO UPDATE LETTERS AND BOXES BASED ON CAR POSITION
+      function updateLettersAndBoxes() {
+        const carX = car.getBoundingClientRect().left + carWidth / 2;
+        const roadRect = road.getBoundingClientRect();
+
+        letters.forEach((letter, i) => {
+          const letterX = roadRect.left + letterOffsets[i];
+          if (carX >= letterX) {
+            letter.style.opacity = 1;
+            letter.style.transform = "translateY(0)";
+          } else {
+            letter.style.opacity = 0;
+            letter.style.transform = "translateY(40px)";
+          }
+        });
+
+        gsap.set(trail, { width: carX - roadRect.left });
+
+        // SHOW STAT BOXES WHEN CAR PASSES
+        boxes.forEach((box, i) => {
+          const boxX = roadRect.left + roadWidth * (0.2 + i * 0.2);
+          if (carX >= boxX) {
+            gsap.to(box, {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          } else {
+            gsap.to(box, {
+              opacity: 0,
+              y: 20,
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
